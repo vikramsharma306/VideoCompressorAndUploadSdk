@@ -1,0 +1,3 @@
+include ':lightcompressor'
+include ':app'
+rootProject.name = "VideoCompressorAndUploadSdk"

@@ -1,0 +1,25 @@
+-- Merging decision tree log ---
+manifest
+ADDED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml:1:1-64
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml:1:1-64
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml:1:1-64
+	package
+		ADDED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml:1:11-61
+		INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+		INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml:1:1-64
+uses-sdk
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+		ADDED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+		INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+		ADDED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+		INJECTED from D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
