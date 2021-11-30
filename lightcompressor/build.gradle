@@ -15,6 +15,7 @@ android {
             minifyEnabled false
         }
     }
+
 }
 
 dependencies {

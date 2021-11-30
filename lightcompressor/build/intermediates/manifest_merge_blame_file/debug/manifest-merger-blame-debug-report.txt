@@ -4,8 +4,8 @@
 4
 5    <uses-sdk
 6        android:minSdkVersion="21"
-6-->D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+6-->D:\2020 Project\VideoCompressorAndUploadSdk\lightcompressor\src\main\AndroidManifest.xml
 7        android:targetSdkVersion="30" />
-7-->D:\2020 Project\AndroidStudioProject\VideoCompressorSdk\lightcompressor\src\main\AndroidManifest.xml
+7-->D:\2020 Project\VideoCompressorAndUploadSdk\lightcompressor\src\main\AndroidManifest.xml
 8
 9</manifest>

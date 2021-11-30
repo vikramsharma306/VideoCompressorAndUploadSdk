@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- <string name="s3_access_key">AKIAICDJB6PNXRFFII5Q</string>
+     <string name="s3_secret">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</string>-->
+    <!--   <string name="s3_bucket">ap-south-1</string>-->
+
+
+    <string name="s3_access_key">AKIASTLI4S4OFBZYNZCW</string>
+    <string name="s3_secret">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</string>
+
+</resources>

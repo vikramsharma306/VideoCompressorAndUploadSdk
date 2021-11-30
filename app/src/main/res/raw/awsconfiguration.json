@@ -1,0 +1,21 @@
+{
+  "Version": "1.0",
+  "CredentialsProvider": {
+    "CognitoIdentity": {
+      "Default": {
+        "PoolId": "urban-user",
+        "Region": "ap-south-1"
+      }
+    }
+  },
+  "IdentityManager": {
+    "Default": {
+    }
+  },
+  "S3TransferUtility": {
+    "Default": {
+      "Bucket": "ott960",
+      "Region": "ap-south-1"
+    }
+  }
+}
