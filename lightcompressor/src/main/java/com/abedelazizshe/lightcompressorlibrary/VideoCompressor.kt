@@ -16,31 +16,6 @@ object VideoCompressor : CoroutineScope by MainScope() {
 
     private var job: Job? = null
 
-    /**
-     * This function compresses a given [srcPath] or [srcUri] video file and writes the compressed
-     * video file at [destPath]
-     *
-     * The source video can be provided as a string path or a content uri. If both [srcPath] and
-     * [srcUri] are provided, [srcUri] will be ignored.
-     *
-     * Passing [srcUri] requires [context].
-     *
-     * @param [context] the application context.
-     * @param [srcUri] the content Uri of the video file.
-     * @param [srcPath] the path of the provided video file to be compressed
-     * @param [destPath] the path where the output compressed video file should be saved
-     * @param [listener] a compression listener that listens to compression [CompressionListener.onStart],
-     * [CompressionListener.onProgress], [CompressionListener.onFailure], [CompressionListener.onSuccess]
-     * and if the compression was [CompressionListener.onCancelled]
-     * @param [configureWith] to allow add video compression configuration that could be:
-     * [Configuration.quality] to allow choosing a video quality that can be [VideoQuality.LOW],
-     * [VideoQuality.MEDIUM], [VideoQuality.HIGH], and [VideoQuality.VERY_HIGH].
-     * This defaults to [VideoQuality.MEDIUM]
-     * [Configuration.isMinBitRateEnabled] to determine if the checking for a minimum bitrate threshold
-     * before compression is enabled or not. This default to `true`
-     * [Configuration.videoBitrate] which is a custom bitrate for the video. You might consider setting
-     * [Configuration.isMinBitRateEnabled] to `false` if your bitrate is less than 2000000.
-     */
     @JvmStatic
     @JvmOverloads
     fun start(

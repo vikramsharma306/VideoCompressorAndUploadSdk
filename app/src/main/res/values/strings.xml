@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">VideoCompressorAndUploadSdk</string>
 
-    <string name="home_title">Video Compressor Sample</string>
+    <string name="home_title">Video Compressor</string>
     <string name="pick_video">Pick Video</string>
     <string name="record_video">Record Video</string>
+    <string name="compress_request_queue_msg">Video compress request already in queue.</string>
+    <string name="video_upload_reuqest_in_queue_msg">Video upload request already in queue.</string>
+    <string name="video_upload_error_message">Please try again ,getting some issue in uploading video.</string>
 </resources>

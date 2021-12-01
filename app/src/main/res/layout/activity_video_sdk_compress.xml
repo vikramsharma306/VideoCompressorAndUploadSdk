@@ -106,33 +106,86 @@
 
     </RelativeLayout>
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:orientation="vertical">
+
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/pickVideo"
-            android:layout_width="0dp"
+            android:id="@+id/CompressVideoButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:background="@color/colorBrown"
-            android:text="@string/pick_video"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@color/colorPrimaryDark"
+            android:text="Compress Video"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:visibility="gone"
             android:textColor="@color/colorWhite" />
+
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/recordVideo"
-            android:layout_width="0dp"
+            android:id="@+id/uploadVideoButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/colorBrown"
-            android:text="@string/record_video"
-
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@color/colorPrimaryDark"
+            android:text="Upload Video"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:visibility="gone"
             android:textColor="@color/colorWhite" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/doneButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@color/colorPrimaryDark"
+            android:text="OK"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:visibility="gone"
+            android:textColor="@color/colorWhite" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/pickVideo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@color/colorBrown"
+                android:text="@string/pick_video"
+                android:textColor="@color/colorWhite" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/recordVideo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/colorBrown"
+                android:text="@string/record_video"
+
+                android:textColor="@color/colorWhite" />
+
+        </LinearLayout>
+
 
     </LinearLayout>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

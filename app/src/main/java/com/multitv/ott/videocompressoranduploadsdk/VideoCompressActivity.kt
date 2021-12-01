@@ -10,12 +10,12 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
+import android.text.TextUtils
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.abedelazizshe.lightcompressorlibrary.CompressionListener
 import com.abedelazizshe.lightcompressorlibrary.VideoCompressor
@@ -32,10 +32,8 @@ import kotlinx.android.synthetic.main.video_upload_content.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
+import java.util.*
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -51,7 +49,16 @@ class VideoCompressActivity : AppCompatActivity() {
         const val REQUEST_CAPTURE_VIDEO = 1
     }
 
+
+    private val REQUEST_WRITE_PERMISSION = 786
+
+    private var isVideoCompressRequestInQueue = false
+    private var isVideouUploadRequestInQueue = false
+
     private lateinit var playableVideoPath: String
+    private var videoUri: Uri? = null
+    private var videoUrl = ""
+    private var isCameraButtonClick = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,18 +68,48 @@ class VideoCompressActivity : AppCompatActivity() {
         setReadStoragePermission()
 
         pickVideo.setOnClickListener {
-            pickVideo()
+            VideoCompressor.cancel()
+            CompressVideoButton.visibility = View.GONE
+            uploadVideoButton.visibility = View.GONE
+            doneButton.visibility = View.GONE
+
+            if (isPermissionGranted())
+                pickVideo()
+            else
+                setReadStoragePermission()
+
+            isCameraButtonClick = false
         }
 
         recordVideo.setOnClickListener {
-            dispatchTakeVideoIntent()
+            VideoCompressor.cancel()
+            CompressVideoButton.visibility = View.GONE
+            uploadVideoButton.visibility = View.GONE
+            doneButton.visibility = View.GONE
+
+            if (isPermissionGranted())
+                dispatchTakeVideoIntent()
+            else
+                setReadStoragePermission()
+
+            isCameraButtonClick = true
         }
 
         cancel.setOnClickListener {
             VideoCompressor.cancel()
+            VideoUploadSdkCallBackState.getInstance().uploadVideoCallBackState("", false)
+            finish()
         }
 
         videoLayout.setOnClickListener { VideoPerviewPlayerActivity.start(this, playableVideoPath) }
+
+        doneButton.setOnClickListener {
+            if (videoUrl != null && !TextUtils.isEmpty(videoUrl))
+                VideoUploadSdkCallBackState.getInstance().uploadVideoCallBackState(videoUrl, true)
+            else
+                Toast.makeText(this, getString(R.string.video_upload_error_message), Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     //Pick a video file from device
@@ -102,67 +139,136 @@ class VideoCompressActivity : AppCompatActivity() {
 
         if (resultCode == Activity.RESULT_OK)
             if (requestCode == REQUEST_SELECT_VIDEO || requestCode == REQUEST_CAPTURE_VIDEO) {
-                handleResult(data)
+                videoUri = data?.data!!
+                handleResult(data?.data!!)
             }
 
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun handleResult(data: Intent?) {
-        if (data != null && data.data != null) {
-            val uri = data.data
 
-            var originalFileSize = File(getMediaPath(applicationContext, uri!!)).length()
-            val digitGroups = (log10(originalFileSize.toDouble()) / log10(1024.0)).toInt()
-            val totalSize = originalFileSize / 1024.0.pow(digitGroups.toDouble())
-
-
-            // Duration
-            val mmr = MediaMetadataRetriever()
-            mmr.setDataSource(this, uri)
-            val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-            val millSecond = durationStr!!.toInt()
-            val minutes = millSecond / 1000 / 60
-
-            Log.e("File Duration:::", "Less :::" + minutes)
+    private fun handleResult(uri: Uri?) {
+        doneButton.visibility = View.GONE
+        videoUrl = ""
+        var pathOfVideo = ""
+        var originalFileSize = File(getMediaPath(applicationContext, uri!!)).length()
+        val digitGroups = (log10(originalFileSize.toDouble()) / log10(1024.0)).toInt()
+        val totalSize = originalFileSize / 1024.0.pow(digitGroups.toDouble())
 
 
-            var streamableFile: File? = null
-            uri?.let {
-                runOnUiThread {
-                    mainContents.visibility = View.VISIBLE
-                    Glide.with(applicationContext).load(uri).into(videoImage)
-                }
+        // Duration
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(this, uri)
+        val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        val millSecond = durationStr!!.toInt()
+        val minutes = millSecond / 1000 / 60
+        val seconds = (millSecond / 1000 % 60)
+        Log.e("File Duration:::", "Less :::" + minutes)
+        Log.e("File length:::", "original :::" + totalSize)
 
-                GlobalScope.launch {
-                    // run in background as it can take a long time if the video is big,
-                    // this implementation is not the best way to do it,
-                    // todo(abed): improve threading
-                    val job = async { getMediaPath(applicationContext, uri) }
-                    val path = job.await()
+        var streamableFile: File? = null
+        uri?.let {
+            runOnUiThread {
+                mainContents.visibility = View.VISIBLE
+                originalSize.setText("")
+                progress.setText("")
+                newSize.setText("")
+                timeTaken.setText("")
+                Glide.with(applicationContext).load(uri).into(videoImage)
+            }
 
-                    val desFile = saveVideoFile(path)
-                    streamableFile = saveVideoFile(path)
+            GlobalScope.launch {
+                // run in background as it can take a long time if the video is big,
+                // this implementation is not the best way to do it,
+                // todo(abed): improve threading
+                val job = async { getMediaPath(applicationContext, uri) }
+                val path = job.await()
 
-                    playableVideoPath = if (streamableFile != null) streamableFile!!.path
-                    else path
+                val desFile = saveVideoFile(uri.path)
+                streamableFile = saveVideoFile(uri.path)
 
+                playableVideoPath = if (streamableFile != null) streamableFile!!.path
+                else path
 
-                    if (totalSize < 20 || minutes < 2) {
-                        processVideo(uri, desFile!!, streamableFile!!, path)
-                        Log.e("File length:::", "Less :::" + totalSize)
+                Log.e("File length:::", "desv File :::" + desFile?.length())
+                Log.e("File length:::", "streamable File :::" + streamableFile?.length())
+
+                if (isCameraButtonClick) {
+                    Log.e("Source video:::", "Camera")
+                    if (totalSize < 50 || seconds < 30) {
+                        Log.e("File length:::", "small :::" + totalSize)
+                        isVideoCompressRequestInQueue = true
+                        isVideouUploadRequestInQueue = false
+                        runOnUiThread {
+                            CompressVideoButton.visibility = View.VISIBLE
+                            uploadVideoButton.visibility = View.GONE
+                        }
                     } else {
-                        Log.e("File length:::", "gratter:::" + totalSize)
+                        // FileStreamUttils().getFilePath(uri)
+                        Log.e("File length:::", "large:::" + totalSize)
+                        isVideoCompressRequestInQueue = false
+                        isVideouUploadRequestInQueue = true
+                        runOnUiThread {
+                            uploadVideoButton.visibility = View.VISIBLE
+                            CompressVideoButton.visibility = View.GONE
+                        }
+
+                        pathOfVideo = processVideoWithoutCompress(path)!!
+                    }
+                } else {
+                    Log.e("Source video:::", "Gallery")
+                    if (totalSize < 50) {
+                        Log.e("File length:::", "small :::" + totalSize)
+
+                        isVideoCompressRequestInQueue = true
+                        isVideouUploadRequestInQueue = false
+
+                        runOnUiThread {
+                            CompressVideoButton.visibility = View.VISIBLE
+                            uploadVideoButton.visibility = View.GONE
+                        }
+
+                        if (streamableFile != null)
+                            pathOfVideo = streamableFile?.path!!
+                        else
+                            pathOfVideo = desFile?.path!!
+
+                    } else {
+                        Log.e("File length:::", "large:::" + totalSize)
+                        Log.e("File :::", "large file path :::" + processVideoWithoutCompress(path))
+                        playableVideoPath = processVideoWithoutCompress(path)!!
+
+                        isVideoCompressRequestInQueue = false
+                        isVideouUploadRequestInQueue = true
+
+                        pathOfVideo = processVideoWithoutCompress(path)!!
+
+                        runOnUiThread {
+                            uploadVideoButton.visibility = View.VISIBLE
+                            CompressVideoButton.visibility = View.GONE
+                        }
                     }
 
                 }
+
+                uploadVideoButton.setOnClickListener {
+                    if (isVideouUploadRequestInQueue)
+                        uploadVideoOnAws(pathOfVideo)
+                    else
+                        Toast.makeText(this@VideoCompressActivity, getString(R.string.compress_request_queue_msg), Toast.LENGTH_SHORT).show()
+                }
+
+                CompressVideoButton.setOnClickListener {
+                    if (isVideoCompressRequestInQueue)
+                        processVideo(uri, desFile!!, streamableFile!!, path)
+                    else
+                        Toast.makeText(this@VideoCompressActivity, getString(R.string.video_upload_reuqest_in_queue_msg), Toast.LENGTH_SHORT).show()
+
+                }
+
             }
-
-
-            // uploadVideoOnAws(uri.path!!)
-
-
         }
+
     }
 
 
@@ -177,8 +283,7 @@ class VideoCompressActivity : AppCompatActivity() {
         val removeSpaceFileName = name.replace(" ", "_")
         val fileName = removeSpaceFileName.replace("-", "_")
 
-        //https://d1ik1ve0yltxwm.cloudfront.net /multitv/video/960/fileName
-        val videoUrl = "https://d1ik1ve0yltxwm.cloudfront.net/multitv/video/960/$fileName"
+        videoUrl = "https://d1ik1ve0yltxwm.cloudfront.net/multitv/video/960/$fileName"
 
         Log.e("Video Url :::", videoUrl)
 
@@ -219,6 +324,13 @@ class VideoCompressActivity : AppCompatActivity() {
                     Log.e("file uploaded======", "bytes:::::" + uploadObserver.bytesTotal)
 
                     Log.e("file uploaded======", "completed")
+
+                    isVideoCompressRequestInQueue = false
+                    isVideouUploadRequestInQueue = false
+                    CompressVideoButton.visibility = View.GONE
+                    uploadVideoButton.visibility = View.GONE
+                    doneButton.visibility = View.VISIBLE
+
                     Toast.makeText(this@VideoCompressActivity, "Video Upload Completed!", Toast.LENGTH_SHORT).show()
 
                 }
@@ -234,6 +346,15 @@ class VideoCompressActivity : AppCompatActivity() {
                 )
 
 
+                if (percentDone <= 100 && percentDone.toInt() % 5 == 0)
+                    runOnUiThread {
+                        progress.text = "Uploading... ${percentDone.toLong()}%"
+                        progressBar.progress = percentDone
+                        progress.visibility = View.VISIBLE
+                        progressBar.visibility = View.VISIBLE
+                    }
+
+
             }
 
             override fun onError(id: Int, ex: Exception) {
@@ -242,40 +363,90 @@ class VideoCompressActivity : AppCompatActivity() {
             }
 
         })
+    }
 
-        if (TransferState.COMPLETED == uploadObserver?.state) {
 
-            Log.e("file uploaded======", "backetname:::::" + uploadObserver.bucket)
-            Log.e("file uploaded======", "path:::::" + uploadObserver.absoluteFilePath)
-            Log.e("file uploaded======", "key:::::" + uploadObserver.key)
-            Log.e("file uploaded======", "bytes:::::" + uploadObserver.bytesTotal)
+    override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_WRITE_PERMISSION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.e("Permission Stauts", "::::: grantted" + permissions.size)
+        } else {
+            // setReadStoragePermission()
+        }
+    }
 
-            Log.e("file uploaded======", "completed")
-            Toast.makeText(this@VideoCompressActivity, "Video Upload Successfully.", Toast.LENGTH_SHORT).show()
+
+    private fun isPermissionGranted(): Boolean {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true
+        } else {
+            return false
         }
     }
 
 
     private fun setReadStoragePermission() {
-        if (ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                            this,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    )
-            ) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                        1
-                )
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(
+                    arrayOf(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                    ), REQUEST_WRITE_PERMISSION
+            )
         }
     }
+
+
+    private fun processVideoWithoutCompress(filePath: String): String? {
+        val newfile: File
+        try {
+            val currentFile = File(filePath)
+            val loc = Environment.getExternalStorageDirectory()
+            val directory = File(loc.absolutePath.toString() + "/Vikram")
+            directory.mkdir()
+            val fileName = currentFile.name + ".mp4"
+            newfile = File(directory, fileName)
+
+
+            if (currentFile.exists()) {
+                val `in`: InputStream = FileInputStream(currentFile)
+                val out: OutputStream = FileOutputStream(newfile)
+
+                // Copy the bits from instream to outstream
+                val buf = ByteArray(1024)
+                var len: Int
+                while (`in`.read(buf).also { len = it } > 0) {
+                    out.write(buf, 0, len)
+                }
+                `in`.close()
+                out.close()
+                Log.e("Saved", "Video file saved successfully.")
+            } else {
+                Log.e("Saved", "Video saving failed. Source file missing.")
+            }
+
+            return newfile.path
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+
+    /* private fun loadVideoFromInternalStorage(filePath: String) {
+         val uri = Uri.parse(Environment.getExternalStorageDirectory().toString() + filePath)
+         myVideoView.setVideoURI(uri)
+     }*/
+
 
     @SuppressLint("SetTextI18n")
     private fun processVideo(uri: Uri?, desFile: File, streamableFile: File, path: String) {
@@ -294,7 +465,7 @@ class VideoCompressActivity : AppCompatActivity() {
                             //Update UI
                             if (percent <= 100 && percent.toInt() % 5 == 0)
                                 runOnUiThread {
-                                    progress.text = "${percent.toLong()}%"
+                                    progress.text = "Compressing..." + "${percent.toLong()}%"
                                     progressBar.progress = percent.toInt()
                                 }
                         }
@@ -325,24 +496,34 @@ class VideoCompressActivity : AppCompatActivity() {
                                 Handler(it).postDelayed({
                                     progress.visibility = View.GONE
                                     progressBar.visibility = View.GONE
+
+                                    isVideoCompressRequestInQueue = false
+                                    isVideouUploadRequestInQueue = true
+                                    CompressVideoButton.visibility = View.GONE
+                                    uploadVideoButton.visibility = View.VISIBLE
+
                                 }, 50)
                             }
 
-                            var pathOfVideo = ""
-                            if (streamableFile != null)
-                                pathOfVideo = streamableFile.path
-                            else
-                                pathOfVideo = desFile.path
+                            /* var pathOfVideo = ""
+                             if (streamableFile != null)
+                                 pathOfVideo = streamableFile.path
+                             else
+                                 pathOfVideo = desFile.path
 
-                            uploadVideoOnAws(pathOfVideo)
+                             uploadVideoOnAws(pathOfVideo)*/
                         }
 
                         override fun onFailure(failureMessage: String) {
                             progress.text = failureMessage
                             Log.wtf("failureMessage", failureMessage)
+                            isVideoCompressRequestInQueue = true
+                            isVideouUploadRequestInQueue = false
                         }
 
                         override fun onCancelled() {
+                            isVideoCompressRequestInQueue = true
+                            isVideouUploadRequestInQueue = false
                             Log.wtf("TAG", "compression has been cancelled")
                             // make UI changes, cleanup, etc
                         }
