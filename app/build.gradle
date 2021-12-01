@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'android-library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.multitv.ott.videocompressoranduploadsdk"
+        //applicationId "com.multitv.ott.videocompressoranduploadsdk"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
