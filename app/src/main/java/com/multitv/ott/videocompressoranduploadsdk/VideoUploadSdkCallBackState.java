@@ -3,7 +3,7 @@ package com.multitv.ott.videocompressoranduploadsdk;
 public class VideoUploadSdkCallBackState {
 
     public interface OnCustomStateListener {
-        void stateChanged();
+        void onVideoUploadcallBack();
     }
 
     private static VideoUploadSdkCallBackState mInstance;
