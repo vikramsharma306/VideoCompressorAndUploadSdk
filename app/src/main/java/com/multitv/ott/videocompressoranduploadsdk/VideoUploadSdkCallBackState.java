@@ -3,9 +3,10 @@ package com.multitv.ott.videocompressoranduploadsdk;
 public class VideoUploadSdkCallBackState {
     private String videoUrl;
     private boolean isVideoUploaded;
+    private OnCustomStateListener onCustomStateListener;
 
     public interface OnCustomStateListener {
-        void onVideoUploadcallBack(String url);
+        void onVideoUploadcallBack(String videoUrl, boolean isVideoUploaded);
     }
 
     private static VideoUploadSdkCallBackState mInstance;
@@ -28,6 +29,7 @@ public class VideoUploadSdkCallBackState {
     public void uploadVideoCallBackState(String videoUrl, boolean isVideoUploaded) {
         this.videoUrl = videoUrl;
         this.isVideoUploaded = isVideoUploaded;
+        onCustomStateListener.onVideoUploadcallBack(videoUrl, isVideoUploaded);
     }
 
     public String getUploadVideoUrl() {
