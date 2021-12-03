@@ -204,6 +204,13 @@ class VideoCompressActivity : AppCompatActivity() {
                             CompressVideoButton.visibility = View.VISIBLE
                             uploadVideoButton.visibility = View.GONE
                         }
+
+
+                        if (streamableFile != null)
+                            pathOfVideo = streamableFile?.path!!
+                        else
+                            pathOfVideo = desFile?.path!!
+
                     } else {
                         // FileStreamUttils().getFilePath(uri)
                         Log.e("File length:::", "large:::" + totalSize)
@@ -416,7 +423,7 @@ class VideoCompressActivity : AppCompatActivity() {
             val loc = Environment.getExternalStorageDirectory()
             val directory = File(loc.absolutePath.toString() + "/VideoCompressAndUploadSdk")
             directory.mkdir()
-            val fileName = currentFile.name + ".mp4"
+            val fileName = currentFile.name
             newfile = File(directory, fileName)
 
 
