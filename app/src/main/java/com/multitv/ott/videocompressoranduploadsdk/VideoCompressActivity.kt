@@ -108,6 +108,9 @@ class VideoCompressActivity : AppCompatActivity() {
                 VideoUploadSdkCallBackState.getInstance().uploadVideoCallBackState(videoUrl, true)
             else
                 Toast.makeText(this, getString(R.string.video_upload_error_message), Toast.LENGTH_SHORT).show()
+
+
+            finish()
         }
 
     }
