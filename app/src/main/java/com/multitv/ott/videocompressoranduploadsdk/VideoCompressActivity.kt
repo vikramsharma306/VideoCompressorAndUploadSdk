@@ -287,6 +287,8 @@ class VideoCompressActivity : AppCompatActivity() {
 
         Log.e("Video Url :::", videoUrl)
 
+        Log.e("Video", "https://d1ik1ve0yltxwm.cloudfront.net/multitv/video/960/$fileName.mp4");
+
 
         val s3Client = AmazonS3Client(credentials)
         var folderName = "multitv/video/960/$fileName"
