@@ -184,14 +184,12 @@ class VideoCompressActivity : AppCompatActivity() {
                 val job = async { getMediaPath(applicationContext, uri) }
                 val path = job.await()
 
-                val desFile = saveVideoFile(uri.path)
-                streamableFile = saveVideoFile(uri.path)
+                val desFile = saveVideoFile(path)
+                streamableFile = saveVideoFile(path)
 
                 playableVideoPath = if (streamableFile != null) streamableFile!!.path
                 else path
 
-                Log.e("File length:::", "desv File :::" + desFile?.length())
-                Log.e("File length:::", "streamable File :::" + streamableFile?.length())
 
                 if (isCameraButtonClick) {
                     Log.e("Source video:::", "Camera")
@@ -291,7 +289,7 @@ class VideoCompressActivity : AppCompatActivity() {
 
 
         val s3Client = AmazonS3Client(credentials)
-        var folderName = "multitv/video/960/$fileName.mp4"
+        var folderName = "multitv/video/960/$fileName"
         // backet name ott960
 
         val transferUtility = TransferUtility.builder()
@@ -413,7 +411,7 @@ class VideoCompressActivity : AppCompatActivity() {
         try {
             val currentFile = File(filePath)
             val loc = Environment.getExternalStorageDirectory()
-            val directory = File(loc.absolutePath.toString() + "/Vikram")
+            val directory = File(loc.absolutePath.toString() + "/VideoCompressAndUploadSdk")
             directory.mkdir()
             val fileName = currentFile.name + ".mp4"
             newfile = File(directory, fileName)
