@@ -282,7 +282,7 @@ class VideoCompressActivity : AppCompatActivity() {
         val name = filePath.substring(filePath.lastIndexOf("/") + 1)
         val removeSpaceFileName = name.replace(" ", "_")
         val fileName = removeSpaceFileName.replace("-", "_")
-
+        Log.e("Video file Name :::", fileName)
         videoUrl = "https://d1ik1ve0yltxwm.cloudfront.net/multitv/video/960/$fileName"
 
         Log.e("Video Url :::", videoUrl)
