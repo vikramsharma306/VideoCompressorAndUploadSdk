@@ -1,2 +1,0 @@
-com/abedelazizshe/lightcompressorlibrary/BuildConfig.java
- com.abedelazizshe.lightcompressorlibrary.BuildConfig
