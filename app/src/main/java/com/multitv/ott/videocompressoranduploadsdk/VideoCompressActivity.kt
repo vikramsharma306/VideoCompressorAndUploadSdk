@@ -452,11 +452,6 @@ class VideoCompressActivity : AppCompatActivity() {
     }
 
 
-    /* private fun loadVideoFromInternalStorage(filePath: String) {
-         val uri = Uri.parse(Environment.getExternalStorageDirectory().toString() + filePath)
-         myVideoView.setVideoURI(uri)
-     }*/
-
 
     @SuppressLint("SetTextI18n")
     private fun processVideo(uri: Uri?, desFile: File, streamableFile: File, path: String) {
@@ -515,13 +510,6 @@ class VideoCompressActivity : AppCompatActivity() {
                                 }, 50)
                             }
 
-                            /* var pathOfVideo = ""
-                             if (streamableFile != null)
-                                 pathOfVideo = streamableFile.path
-                             else
-                                 pathOfVideo = desFile.path
-
-                             uploadVideoOnAws(pathOfVideo)*/
                         }
 
                         override fun onFailure(failureMessage: String) {
